@@ -27,11 +27,11 @@
 #include <stdint.h>
 
 //TODO: Declare a global variable to hold the file descriptor for the server socket
-
+int master_fd;
 //TODO: Declare a global variable to hold the mutex lock for the server socket
-
+pthread_mutex_t socket_access = PTHREAD_MUTEX_INITIALIZER;
 //TODO: Declare a gloabl socket address struct to hold the address of the server
-
+struct sockaddr_in server_addy;
 /*
 ################################################
 ##############Server Functions##################
@@ -48,7 +48,11 @@
 void init(int port) {
    //TODO: create an int to hold the socket file descriptor
    //TODO: create a sockaddr_in struct to hold the address of the server
-
+  int fd = socket (PF_INET, SOCK_STREAM, 0);
+  struct sockaddr_in addr;
+  addr.sin_family = AF_INET;
+  addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  addr.sin_port = htons(port);
 
    /**********************************************
     * IMPORTANT!
@@ -60,10 +64,11 @@ void init(int port) {
    // TODO: Create a socket and save the file descriptor to sd (declared above)
    
    // TODO: Change the socket options to be reusable using setsockopt(). 
-
+    int enable = 1;
+    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*)&enable, sizeof(int));
 
    // TODO: Bind the socket to the provided port.
-  
+    bind(fd, (struct *sockaddr_in) &addr, sizeof(addr));
 
    // TODO: Mark the socket as a pasive socket. (ie: a socket that will be used to receive connections)
 
@@ -72,6 +77,7 @@ void init(int port) {
    
    // We save the file descriptor to a global variable so that we can use it in accept_connection().
    // TODO: Save the file descriptor to the global variable master_fd
+   master_fd = fd;
 
    printf("UTILS.O: Server Started on Port %d\n",port);
    fflush(stdout);
@@ -88,7 +94,8 @@ void init(int port) {
 int accept_connection(void) {
 
    //TODO: create a sockaddr_in struct to hold the address of the new connection
-  
+  struct sockaddr_in addr;
+  int fd;
    
    /**********************************************
     * IMPORTANT!
@@ -98,14 +105,16 @@ int accept_connection(void) {
    
    
    // TODO: Aquire the mutex lock
+   pthread_mutex_lock(&socket_access);
 
    // TODO: Accept a new connection on the passive socket and save the fd to newsock
+   int connection_fd = (master_fd, (struct sockaddr*)&addr, sizeof(addr)); 
 
    // TODO: Release the mutex lock
-
+   pthread_mutex_unlock(&socket_access);
 
    // TODO: Return the file descriptor for the new client connection
-   
+   return(connection_fd);
 }
 
 
