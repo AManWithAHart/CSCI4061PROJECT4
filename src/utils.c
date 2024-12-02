@@ -124,19 +124,18 @@ int accept_connection(void) {
    - size is the size of the file you want to send
    - returns 0 on success, -1 on failure 
 ************************************************/
-int send_file_to_client(int socket, char * buffer, int size) 
-{
-    //TODO: create a packet_t to hold the packet data
- 
+int send_file_to_client(int socket, char * buffer, int size) {
+    packet_t packet = {.size = (unsigned) size}; // moderately faster way to init a struct
 
-    //TODO: send the file size packet
+    if (write(socket, packet, sizeof(packet_t)) < sizeof(packet_t)) {
+        return -1; // not everything was written, failure
+    }
 
-
-    //TODO: send the file data
-  
-    //TODO: return 0 on success, -1 on failure
-    return 0; // temporarily added to satisfy compiler warnings
-
+    if (write(socket, buffer, (unsigned) size) < size) { 
+        return -1; // not everything was written, failure
+    }
+    // no failure, success!
+    return 0; 
 }
 
 
@@ -149,7 +148,7 @@ int send_file_to_client(int socket, char * buffer, int size)
 char * get_request_server(int fd, size_t *filelength)
 {
     //TODO: create a packet_t to hold the packet data
- 
+
     //TODO: receive the response packet
   
     //TODO: get the size of the image from the packet
