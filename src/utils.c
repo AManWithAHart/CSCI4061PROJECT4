@@ -182,8 +182,24 @@ char * get_request_server(int fd, size_t *filelength)
 ************************************************/
 int setup_connection(int port)
 {
-    return 0; // temporarily added to satisfy compiler warnings
+    //TODO: create a sockaddr_in struct to hold the address of the server   
+    struct sockaddr_in serveraddr;
 
+    //TODO: create a socket and save the file descriptor to sockfd
+    int sockfd;
+    if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+	perror("failed to create a socket for server in setup_connection");
+	exit(EXIT_FAILURE);
+    }
+
+    serveraddr.sin_family = AF_INET;
+    serveraddr.sin_port = htons(port);
+    serveraddr.sin_addr.saddr = htonl(INADDR_ANY); 
+    
+    if (connect(sockfd, serveraddr, sizeof(sockaddr_in) != 0)) {
+	perror("client failed to conect to server");
+    }
+    return sockfd;
 }
 
 
