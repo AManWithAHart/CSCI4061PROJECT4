@@ -26,11 +26,9 @@
 #include <limits.h>
 #include <stdint.h>
 
-//TODO: Declare a global variable to hold the file descriptor for the server socket
-
-//TODO: Declare a global variable to hold the mutex lock for the server socket
-
-//TODO: Declare a gloabl socket address struct to hold the address of the server
+int master_fd; // should this be master_fd?
+pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
+struct sockaddr_in master_addr;
 
 /*
 ################################################
@@ -46,36 +44,43 @@
    - if init encounters any errors, it will call exit().
 ************************************************/
 void init(int port) {
-   //TODO: create an int to hold the socket file descriptor
-   //TODO: create a sockaddr_in struct to hold the address of the server
 
-
-   /**********************************************
+    int sockfd;
+    master_addr.sin_family = AF_INET; // same a PF_INET 
+    master_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    master_addr.sin_port = htons(port);
+    /**********************************************
     * IMPORTANT!
     * ALL TODOS FOR THIS FUNCTION MUST BE COMPLETED FOR THE INTERIM SUBMISSION!!!!
     **********************************************/
-   
-   
-   
-   // TODO: Create a socket and save the file descriptor to sd (declared above)
-   
-   // TODO: Change the socket options to be reusable using setsockopt(). 
 
+    if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+        perror("Failed to create socket file descriptor");
+        exit(EXIT_FAILURE);
+    }
 
-   // TODO: Bind the socket to the provided port.
-  
+    // may be a better way than decl variable, going off slides for now
+    int enable = 1; 
+    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (char *) &enable, sizeof(int)) == -1) {
+        perror("Failed to set sock options for socket");
+        exit(EXIT_FAILURE);
+    }
+    
+    if (bind(sockfd, (struct sockaddr *) &master_addr, sizeof(master_addr)) == -1) {
+        perror("Failed to bind socket to server address");
+        exit(EXIT_FAILURE);
+    }
 
-   // TODO: Mark the socket as a pasive socket. (ie: a socket that will be used to receive connections)
-
+    if (listen(sockfd, MAX_QUEUE_LEN)) {
+        perror("call to listen() failed in init()");
+        exit(EXIT_FAILURE);
+    }
    
-   
-   
-   // We save the file descriptor to a global variable so that we can use it in accept_connection().
-   // TODO: Save the file descriptor to the global variable master_fd
+    // We save the file descriptor to a global variable so that we can use it in accept_connection().
+    master_fd = sockfd;
 
-   printf("UTILS.O: Server Started on Port %d\n",port);
-   fflush(stdout);
-
+    printf("UTILS.O: Server Started on Port %d\n",port);
+    fflush(stdout);
 }
 
 
@@ -87,25 +92,28 @@ void init(int port) {
 ***********************************************/
 int accept_connection(void) {
 
-   //TODO: create a sockaddr_in struct to hold the address of the new connection
-  
-   
+    struct sockaddr_in client_sock;
+    unsigned client_sock_len = sizeof(client_sock);    
+
    /**********************************************
     * IMPORTANT!
     * ALL TODOS FOR THIS FUNCTION MUST BE COMPLETED FOR THE INTERIM SUBMISSION!!!!
     **********************************************/
    
-   
-   
-   // TODO: Aquire the mutex lock
+    if (pthread_mutex_lock(&mtx) != 0) {
+        return -1;
+    }
+    
+    int client_fd;
+    if ((client_fd = accept(master_fd, (struct sockaddr *) &master_addr, &client_sock_len)) == -1) {
+        return -1; // accept failed, return negative value (ignore request)
+    }
 
-   // TODO: Accept a new connection on the passive socket and save the fd to newsock
+    if (pthread_mutex_unlock(&mtx) != 0) {
+        return -1;
+    }
 
-   // TODO: Release the mutex lock
-
-
-   // TODO: Return the file descriptor for the new client connection
-   
+    return client_fd;
 }
 
 
@@ -127,6 +135,7 @@ int send_file_to_client(int socket, char * buffer, int size)
     //TODO: send the file data
   
     //TODO: return 0 on success, -1 on failure
+    return 0; // temporarily added to satisfy compiler warnings
 
 }
 
@@ -148,7 +157,7 @@ char * get_request_server(int fd, size_t *filelength)
     //TODO: recieve the file data and save into a buffer variable.
 
     //TODO: return the buffer
-
+    return NULL; // temporarily added to satisfy compiler warnings
 }
 
 
@@ -175,6 +184,8 @@ int setup_connection(int port)
     //TODO: connect to the server
    
     //TODO: return the file descriptor for the socket
+    return 0; // temporarily added to satisfy compiler warnings
+
 }
 
 
@@ -194,7 +205,7 @@ int send_file_to_server(int socket, FILE *file, int size)
    
 
     // TODO: return 0 on success, -1 on failure
-   
+    return 0; // temporarily added to satisfy compiler warnings
 }
 
 /**********************************************
@@ -223,5 +234,7 @@ int receive_file_from_server(int socket, const char *filename)
    //TODO: recieve the file data and write it to the file
     
     //TODO: return 0 on success, -1 on failure
+    return 0; // temporarily added to satisfy compiler warnings
+
 }
 
