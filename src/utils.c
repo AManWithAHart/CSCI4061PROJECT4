@@ -128,11 +128,11 @@ int send_file_to_client(int socket, char * buffer, int size) {
     packet_t packet = {.size = (unsigned) size}; // moderately faster way to init a struct
 
     if (write(socket, packet, sizeof(packet_t)) < sizeof(packet_t)) {
-        return -1; // not everything was written, failure
+        return -1;
     }
 
-    if (write(socket, buffer, (unsigned) size) < size) { 
-        return -1; // not everything was written, failure
+    if (write(socket, buffer, (unsigned) size) < size) {
+        return -1;
     }
     // no failure, success!
     return 0; 
@@ -148,15 +148,23 @@ int send_file_to_client(int socket, char * buffer, int size) {
 char * get_request_server(int fd, size_t *filelength)
 {
     //TODO: create a packet_t to hold the packet data
-
+    packet_t packet;
     //TODO: receive the response packet
-  
+    if (read(fd, &packet, sizeof(packet_t) < sizeof(packet_t)) {
+    	perror("packet was not properly read");	  
+	exit(EXIT_FAILURE); // should maybe just be return NULL, unclear 
+    } 
     //TODO: get the size of the image from the packet
-
+    unsigned size = packet;
     //TODO: recieve the file data and save into a buffer variable.
-
+    char *buf = (char *) malloc(size);
+    if (read(fd, buf, size) < size) {
+    	perror("file was not properly read");	  
+	exit(EXIT_FAILURE); // should maybe just be return NULL, unclear 
+    }
     //TODO: return the buffer
-    return NULL; // temporarily added to satisfy compiler warnings
+     
+    return buf; // caller should free buf
 }
 
 
@@ -174,15 +182,6 @@ char * get_request_server(int fd, size_t *filelength)
 ************************************************/
 int setup_connection(int port)
 {
-    //TODO: create a sockaddr_in struct to hold the address of the server   
-
-    //TODO: create a socket and save the file descriptor to sockfd
-   
-    //TODO: assign IP, PORT to the sockaddr_in struct
-
-    //TODO: connect to the server
-   
-    //TODO: return the file descriptor for the socket
     return 0; // temporarily added to satisfy compiler warnings
 
 }
