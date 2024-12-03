@@ -272,7 +272,9 @@ int receive_file_from_server(int socket, const char *filename)
         perror("Failed to write to file\n");
         return -1;
     }
+
     free(buf);
+    fclose(f);
     //TODO: return 0 on success, -1 on failure
     return 0; // temporarily added to satisfy compiler warnings
 
