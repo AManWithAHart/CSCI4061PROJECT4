@@ -250,7 +250,7 @@ int receive_file_from_server(int socket, const char *filename)
    //TODO: create a packet_t to hold the packet data
     packet_t packet;
    //TODO: receive the response packet
-    if (read(socket, &packet.size, sizeof(packet_t)) < 0) {
+    if (read(socket, &packet, sizeof(packet_t)) < 0) {
         perror("Error receiving packet from server\n");
         return -1;
     }
