@@ -127,7 +127,7 @@ int accept_connection(void) {
 int send_file_to_client(int socket, char * buffer, int size) {
     packet_t packet = {.size = (unsigned) size}; // moderately faster way to init a struct
 
-    if (write(socket, packet, sizeof(packet_t)) < sizeof(packet_t)) {
+    if (write(socket, &packet, sizeof(packet_t)) < sizeof(packet_t)) {
         return -1;
     }
 
@@ -150,17 +150,17 @@ char * get_request_server(int fd, size_t *filelength)
     //TODO: create a packet_t to hold the packet data
     packet_t packet;
     //TODO: receive the response packet
-    if (read(fd, &packet, sizeof(packet_t) < sizeof(packet_t)) {
+    if (read(fd, &packet, sizeof(packet_t) < sizeof(packet_t))) {
     	perror("packet was not properly read");	  
-	exit(EXIT_FAILURE); // should maybe just be return NULL, unclear 
+	    exit(EXIT_FAILURE); // should maybe just be return NULL, unclear 
     } 
     //TODO: get the size of the image from the packet
-    unsigned size = packet;
+    unsigned size = packet.size;
     //TODO: recieve the file data and save into a buffer variable.
     char *buf = (char *) malloc(size);
     if (read(fd, buf, size) < size) {
     	perror("file was not properly read");	  
-	exit(EXIT_FAILURE); // should maybe just be return NULL, unclear 
+	    exit(EXIT_FAILURE); // should maybe just be return NULL, unclear 
     }
     //TODO: return the buffer
      
@@ -194,9 +194,9 @@ int setup_connection(int port)
 
     serveraddr.sin_family = AF_INET;
     serveraddr.sin_port = htons(port);
-    serveraddr.sin_addr.saddr = htonl(INADDR_ANY); 
-    
-    if (connect(sockfd, serveraddr, sizeof(sockaddr_in) != 0)) {
+    serveraddr.sin_addr.s_addr = htonl(INADDR_ANY); 
+   
+    if (connect(sockfd, (struct sockaddr *) &serveraddr, sizeof(struct sockaddr_in)) != 0) {
 	perror("client failed to conect to server");
     }
     return sockfd;
