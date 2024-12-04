@@ -105,14 +105,16 @@ int accept_connection(void) {
     }
 
     int client_fd;
-    if ((client_fd = accept(master_fd, (struct sockaddr *) &master_addr, &client_sock_len)) == -1) {
+    socklen_t address_size = sizeof(struct sockaddr_in);
+
+    if ((client_fd = accept(master_fd, &master_addr, &address_size)) == -1) {
+        printf("FAILED ACCEPTED\n");
         return -1; // accept failed, return negative value (ignore request)
     }
 
     if (pthread_mutex_unlock(&mtx) != 0) {
         return -1;
     }
-
     return client_fd;
 }
 
@@ -149,13 +151,16 @@ char * get_request_server(int fd, size_t *filelength)
 {
     //TODO: create a packet_t to hold the packet data
     packet_t packet;
+
     //TODO: receive the response packet
     if (read(fd, &packet, sizeof(packet_t)) < sizeof(packet_t)) {
     	perror("packet was not properly read");
 	    exit(EXIT_FAILURE); // should maybe just be return NULL, unclear
     }
+
     //TODO: get the size of the image from the packet
     unsigned size = packet.size;
+    
     //TODO: recieve the file data and save into a buffer variable.
     char *buf = (char *) malloc(size);
     if (read(fd, buf, size) < size) {
@@ -191,6 +196,7 @@ int setup_connection(int port)
 	perror("failed to create a socket for server in setup_connection");
 	exit(EXIT_FAILURE);
     }
+
 
     serveraddr.sin_family = AF_INET;
     serveraddr.sin_port = htons(port);
@@ -247,8 +253,10 @@ int receive_file_from_server(int socket, const char *filename)
         perror("Failed to open file from receive_file_from_server\n");
         return -1;
     }
+
    //TODO: create a packet_t to hold the packet data
     packet_t packet;
+
    //TODO: receive the response packet
     if (read(socket, &packet, sizeof(packet_t)) < 0) {
         perror("Error receiving packet from server\n");

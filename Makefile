@@ -4,7 +4,7 @@ CFLAGS=-g -Wall -pthread
 SRCDIR=src
 INCDIR=include
 LIBDIR=lib
-OUTPUTDIR=output
+OUTPUTDIR=output/img
 
 all: outdir utils server client
 
