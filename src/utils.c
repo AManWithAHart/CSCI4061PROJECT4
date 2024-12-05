@@ -28,7 +28,6 @@
 
 int master_fd; // should this be master_fd?
 pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
-struct sockaddr_in master_addr;
 
 /*
 ################################################
@@ -46,6 +45,7 @@ struct sockaddr_in master_addr;
 void init(int port) {
 
     int sockfd;
+    struct sockaddr_in master_addr;
     master_addr.sin_family = AF_INET; // same a PF_INET
     master_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     master_addr.sin_port = htons(port);
@@ -107,7 +107,7 @@ int accept_connection(void) {
     int client_fd;
     socklen_t address_size = sizeof(struct sockaddr_in);
 
-    if ((client_fd = accept(master_fd, &master_addr, &address_size)) == -1) {
+    if ((client_fd = accept(master_fd, &client_sock, &address_size)) == -1) {
         printf("FAILED ACCEPTED\n");
         return -1; // accept failed, return negative value (ignore request)
     }
