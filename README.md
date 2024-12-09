@@ -19,6 +19,6 @@ The maximum number of database entries is 100.
 The server should accept a backlog of up to 20 connection requests
 
 Contributions:
-Justin and Neven: Mostly implemented additional functions beyond intermediate. 
+Justin and Neven: Implemented base code for functions beyond intermediate. 
 Sam: Helped clean up code and error checked. Implemented final code to get project fully outputing all correct images.
 Matthew: Provided additional error checking and managed to get project outputting images. Talked with TA's regarding issues to help team move forward.
